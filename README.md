@@ -17,3 +17,9 @@ Using [Process Explorer](https://learn.microsoft.com/sysinternals/downloads/proc
 ### Performance
 
 This mod runs in approximately 0.5 seconds on an AMD 5800X3D with DDR4-3200 RAM. It runs during a non-performance critical portion of the game.
+
+### Building
+
+Requires Visual Studio 2022 and uses the .NET Framework 4.7.2.
+
+Adjust the location of the Battletech game folder in Directory.Packages.props. Restore necessary NuGet packages. Build!
