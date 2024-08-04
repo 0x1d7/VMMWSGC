@@ -1,0 +1,8 @@
+{
+    "Name": "VMMWSGC",
+    "Enabled": true,
+    "Version": "1.0.0",
+    "Description": "Empties the Battletech Private WorkingSet on Contract Completion",
+    "DLL": "VMMWSGC.dll",
+    "DLLEntryPoint": "VMMWSGC.Main.Start"
+}
