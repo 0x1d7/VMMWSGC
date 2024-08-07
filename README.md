@@ -1,6 +1,6 @@
 # VMMWSGC (Virtual Memory Manager Working Set Garbage Collection)
 
-VMMWSGC runs [EmptyWorkingSet()](https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-emptyworkingset) upon completion of a contract (mission) in HBS' Battletech (success, failure, or withdrawl). This reduces the private working set of the Battletech process to a few hundred MiB from multi-GiB. Battletech will then reallocate the necessary memory for the private working set.
+VMMWSGC runs [EmptyWorkingSet()](https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-emptyworkingset) upon completion of a contract (mission) in HBS' Battletech (success, failure, or withdrawal). This reduces the private working set of the Battletech process to a few hundred MiB from multi-GiB. Battletech will then reallocate the necessary memory for the private working set.
 
 This mod is targeted at large modpaks such as [RogueTech](https://roguetech.fandom.com/wiki/Roguetech_Wiki), [BTA 3062](https://www.bta3062.com/), and [BEX](https://discourse.modsinexile.com/t/battletech-extended-3025-3061-1-9-3-7/426) which may add significant memory overhead with their additional features, models, etc.
 
