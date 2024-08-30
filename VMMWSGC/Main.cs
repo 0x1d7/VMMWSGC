@@ -17,6 +17,7 @@ namespace VMMWSGC
             s_log.Log("VMMWSGC loaded");
         }
 
+        //Ref: https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-emptyworkingset
         [DllImport("psapi.dll")]
         public static extern bool EmptyWorkingSet(IntPtr hProcess);
 
@@ -25,12 +26,17 @@ namespace VMMWSGC
         {
             try
             {
+                /*Looks like there is an issue with Mono/Unity that causes Process.WorkingSet64 to return 0.
+                This prevents us from providing the end user with a nice value of 'saved' working set. :-(
+                */
+
                 EmptyWorkingSet(Process.GetCurrentProcess().Handle);
                 s_log.Log("[VMMWSGC] Private WorkingSet emptied");
             }
             catch (Exception ex)
             {
                 s_log.Log("[VMMWSGC] Error emptying Private WorkingSet " + ex.ToString());
+                s_log.Log("[VMMWSGC] Please open an issue with the stack trace at https://github.com/0x1d7/VMMWSGC/issues");
             }
         }
     }
