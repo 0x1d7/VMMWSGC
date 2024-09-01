@@ -1,43 +1,64 @@
-﻿using HarmonyLib;
+﻿/*  Copyright (C) 2024  0x1d7 https://github.com/0x1d7/VMMWSGC
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License as published by the Free Software Foundation; either
+    version 2.1 of the License, or (at your option) any later version.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301
+    USA
+*/
+
+using HarmonyLib;
 using HBS.Logging;
-using BattleTech;
+using Newtonsoft.Json;
 using System;
-using System.Runtime.InteropServices;
-using System.Diagnostics;
+using System.Reflection;
 
 namespace VMMWSGC
-{ 
-    [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
+{
     public static class Main
     {
         private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-        public static void Start()
+        public static ModSettings Settings = new ModSettings();
+        public static void Init(string directory, string settingsJSON)
         {
-            Harmony.CreateAndPatchAll(typeof(Main).Assembly, "github.com.0x1d7.vmmwsgc");
-            s_log.Log("VMMWSGC loaded");
-        }
+            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "github.com.0x1d7.vmmwsgc");
+            s_log.Log($"VMMWSGC assembly version {Assembly.GetExecutingAssembly().GetName().Version} loaded");
 
-        //Ref: https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-emptyworkingset
-        [DllImport("psapi.dll")]
-        public static extern bool EmptyWorkingSet(IntPtr hProcess);
-
-        [HarmonyPostfix]
-        private static void Postfix()
-        {
             try
             {
-                /*Looks like there is an issue with Mono/Unity that causes Process.WorkingSet64 to return 0.
-                This prevents us from providing the end user with a nice value of 'saved' working set. :-(
-                */
-
-                EmptyWorkingSet(Process.GetCurrentProcess().Handle);
-                s_log.Log("[VMMWSGC] Private WorkingSet emptied");
+                Settings = JsonConvert.DeserializeObject<ModSettings>(settingsJSON);
+                s_log.Log($"Settings:\n" +
+                    $"RunPostSaveSerialization: {Settings.RunPostSaveSerialization}\n" +
+                    $"RunPostSaveRefresh: {Settings.RunPostSaveRefresh}\n" +
+                    $"RunPostLoadComplete: {Settings.RunPostLoadComplete}\n" +
+                    $"RunPostHeadlessAttachedState: {Settings.RunPostHeadAttachedState}\n" +
+                    $"RunFirstRound: {Settings.RunFirstRound}\n" +
+                    $"ResolveCompleteContract: {Settings.ResolveCompleteContract}");
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                s_log.Log("[VMMWSGC] Error emptying Private WorkingSet " + ex.ToString());
-                s_log.Log("[VMMWSGC] Please open an issue with the stack trace at https://github.com/0x1d7/VMMWSGC/issues");
+                Settings = new ModSettings();
+                s_log.Log("Failed to parse settings");
             }
+        }
+
+        public class ModSettings
+        {
+            public bool RunPostSaveSerialization { get; set; } = true;
+            public bool RunPostSaveRefresh { get; set; } = true;
+            public bool RunPostLoadComplete { get; set; } = true;
+            public bool RunPostHeadAttachedState { get; set; } = true;
+            public bool RunFirstRound { get; set; } = true;
+            public bool ResolveCompleteContract { get; set; } = false;
         }
     }
 }
