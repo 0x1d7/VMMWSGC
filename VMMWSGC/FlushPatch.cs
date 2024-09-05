@@ -106,6 +106,24 @@ namespace VMMWSGC
         }
     }
 
+    /* Runs at the start of each round of a mission
+     * Not sure if this has any perf impact during gameplay
+     * Will leave this setting up to the player */
+    [HarmonyPatch(typeof(TurnDirector), "BeginNewRound")]
+    static internal class GcOnNewRound
+    {
+        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
+
+        [HarmonyPostfix]
+        private static void OnNewRound()
+        {
+            if (Main.Settings.RunOnNewRound != true) return;
+
+            s_log.Log("<TurnDirector.BeginNewRound> Running on new round");
+            Gc.RunGc();
+        }
+    }
+
     /* Runs post-mission after clicking Continue on the salvage screen
      * Likely not required anymore, but will leave it up to the player */
     [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
@@ -130,6 +148,7 @@ namespace VMMWSGC
         //Ref: https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-emptyworkingset
         [DllImport("psapi.dll")]
         public static extern bool EmptyWorkingSet(IntPtr hProcess);
+
         internal static void RunGc()
         {
             try
@@ -147,5 +166,5 @@ namespace VMMWSGC
                 s_log.Log("Please open an issue with the stack trace at https://github.com/0x1d7/VMMWSGC/issues");
             }
         }
-    }
+    }   
 }

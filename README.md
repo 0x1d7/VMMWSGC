@@ -26,7 +26,7 @@ This mod runs in approximately 0.1 milliseconds on an AMD 5800X3D with DDR4-3200
 
 ### Settings
 
-The mod includes a `mod.json` file with a `Settings` entry allowing the player to change when this mod runs. The original point of execution of this mod post-contract completion has been disabled by default as it is no longer necessary, but can be re-enabled by the player.
+The mod includes a `mod.json` file with a `Settings` entry allowing the player to change when this mod runs. The original point of execution of this mod post-contract completion has been disabled by default as it is no longer necessary, but can be re-enabled by the player. In version 1.1.1, the setting `RunOnNewRound` is disabled by default. Enable this setting to empty the working set on every new round in-mission.
 
 ### Building
 

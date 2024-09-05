@@ -42,6 +42,7 @@ namespace VMMWSGC
                     $"RunPostLoadComplete: {Settings.RunPostLoadComplete}\n" +
                     $"RunPostHeadlessAttachedState: {Settings.RunPostHeadAttachedState}\n" +
                     $"RunFirstRound: {Settings.RunFirstRound}\n" +
+                    $"RunOnNewRound: {Settings.RunOnNewRound}\n" +
                     $"ResolveCompleteContract: {Settings.ResolveCompleteContract}");
             }
             catch (Exception)
@@ -58,6 +59,7 @@ namespace VMMWSGC
             public bool RunPostLoadComplete { get; set; } = true;
             public bool RunPostHeadAttachedState { get; set; } = true;
             public bool RunFirstRound { get; set; } = true;
+            public bool RunOnNewRound { get; set; } = false;
             public bool ResolveCompleteContract { get; set; } = false;
         }
     }
