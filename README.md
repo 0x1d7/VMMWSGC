@@ -4,7 +4,7 @@ VMMWSGC runs [EmptyWorkingSet()](https://learn.microsoft.com/windows/win32/api/p
 
 This mod is targeted at large modpaks such as [RogueTech](https://roguetech.fandom.com/wiki/Roguetech_Wiki), [BTAU](https://www.bta3062.com/), and [BEX](https://discourse.modsinexile.com/t/battletech-extended-3025-3061-1-9-3-7/426) which may add significant memory overhead with their additional features, models, etc.
 
-Mod version 1.0.0 is included in BATU which empties the Working Set post-contract. Additional functionality is available in mod version 1.1.0.
+Mod version 1.1.1 is included in BATU/BTA Lite 18.0.1.
 
 ### What does this do?
 
