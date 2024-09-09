@@ -22,122 +22,91 @@ using HarmonyLib;
 using HBS.Logging;
 using System;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace VMMWSGC
 {
     /* Runs after saving a game in certain scenarios */
-    [HarmonyPatch(typeof(SimGameState), "SaveSerializationComplete")]
-    static internal class GcPostSaveSerialization
+    static public class GcPostSaveSerialization
     {
         private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
 
         [HarmonyPostfix]
-        private static void PostLoad()
+        [HarmonyPatch(typeof(SimGameState), "SaveSerializationComplete")]
+        [HarmonyPatch(typeof(SaveGameStructure), "NotifyRefresh")]
+        [HarmonyPatch(typeof(SaveGameStructure), "NotifyLoadCcomplete")]
+        [HarmonyPatch(typeof(SimGameState), "OnHeadAttachedStateCompleteListener")]
+        [HarmonyPatch(typeof(TurnDirector), "StartFirstRound")]
+        [HarmonyPatch(typeof(TurnDirector), "BeginNewRound")]
+        [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
+        private static void PostLoad(MethodBase __originalMethod)
         {
-            if (Main.Settings.RunPostSaveSerialization != true) return;
 
-            s_log.Log("<SimGameState.SaveSerializationComplete> Running save serialization complete");
-            Gc.RunGc();
-        }
-    }
-
-    /* Runs after saving a game in certain scenarios */
-    [HarmonyPatch(typeof(SaveGameStructure), "NotifyRefresh")]
-    static internal class GcPostSaveRefresh
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        [HarmonyPostfix]
-        private static void PostLoad()
-        {
-            if (Main.Settings.RunPostSaveRefresh != true) return;
-
-            s_log.Log("<SaveGameStructure.NotifyRefresh> Running post save refresh");
-            Gc.RunGc();
-        }
-    }
-
-    /* Runs after loading a game in certain scenarios */
-    [HarmonyPatch(typeof(SaveGameStructure), "NotifyLoadCcomplete")]
-    static internal class GcPostLoadComplete
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        [HarmonyPostfix]
-        private static void PostLoad()
-        {
-            if (Main.Settings.RunPostLoadComplete != true) return;
-
-            s_log.Log("<SaveGameStructure.NotifyLoadCcomplete> Running post notify load complete");
-            Gc.RunGc();
-        }
-    }
-
-    /* Runs during and after a game is loaded in certain scenarios */
-    [HarmonyPatch(typeof(SimGameState), "OnHeadAttachedStateCompleteListener")]
-    static internal class GcPostHeadAttachedState
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        [HarmonyPostfix]
-        private static void PostLoad()
-        {
-            if (Main.Settings.RunPostHeadAttachedState != true) return;
-
-            s_log.Log("<SimGameState.OnHeadAttachedStateCompleteListener> Running post attached state complete");
-            Gc.RunGc();
-        }
-    }
-
-    /* Runs in-mission when the first round begins */
-    [HarmonyPatch(typeof(TurnDirector), "StartFirstRound")]
-    static internal class GcFirstRoundMission
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        [HarmonyPostfix]
-        private static void FirstRoundMission()
-        {
-            if (Main.Settings.RunFirstRound != true) return;
-
-            s_log.Log("<TurnDirector.StartFirstRound> Running start first round");
-            Gc.RunGc();
-        }
-    }
-
-    /* Runs at the start of each round of a mission
-     * Not sure if this has any perf impact during gameplay
-     * Will leave this setting up to the player */
-    [HarmonyPatch(typeof(TurnDirector), "BeginNewRound")]
-    static internal class GcOnNewRound
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        [HarmonyPostfix]
-        private static void OnNewRound()
-        {
-            if (Main.Settings.RunOnNewRound != true) return;
-
-            s_log.Log("<TurnDirector.BeginNewRound> Running on new round");
-            Gc.RunGc();
-        }
-    }
-
-    /* Runs post-mission after clicking Continue on the salvage screen
-     * Likely not required anymore, but will leave it up to the player */
-    [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
-    static internal class GcPostMission
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        [HarmonyPostfix]
-        private static void PostMission()
-        {
-            if (Main.Settings.ResolveCompleteContract != true) return;
-
-            s_log.Log("<SimGateState.ResolveCompleteContract> Running post contract");
-            Gc.RunGc();
+            switch(__originalMethod.Name)
+            {
+                /* Runs after saving a game in certain scenarios */
+                case "SaveSerializationComplete":
+                    if (Main.Settings.RunPostSaveSerialization)
+                    {
+                        s_log.Log("<SimGameState.SaveSerializationComplete> Running save serialization complete");
+                        Gc.RunGc();
+                    }
+                    break;
+                /* Runs after saving a game in certain scenarios */
+                case "NotifyRefresh":
+                    if (Main.Settings.RunPostSaveRefresh)
+                    {
+                        s_log.Log("<SaveGameStructure.NotifyRefresh> Running post save refresh");
+                        Gc.RunGc();
+                    }
+                    break;
+                /* Runs after loading a game in certain scenarios */
+                case "NotifyLoadCcomplete":
+                    if (Main.Settings.RunPostLoadComplete)
+                    {
+                        s_log.Log("<SaveGameStructure.NotifyLoadCcomplete> Running post notify load complete");
+                        Gc.RunGc();
+                    }
+                    break;
+                /* Runs during and after a game is loaded in certain scenarios */
+                case "OnHeadAttachedStateCompleteListener":
+                    if (Main.Settings.RunPostHeadAttachedState)
+                    {
+                        s_log.Log("<SimGameState.OnHeadAttachedStateCompleteListener> Running post attached state complete");
+                        Gc.RunGc();
+                    }
+                    break;
+                /* Runs in-mission when the first round begins */
+                case "StartFirstRound":
+                    if (Main.Settings.RunFirstRound)
+                    {
+                        s_log.Log("<TurnDirector.StartFirstRound> Running start first round");
+                        Gc.RunGc();
+                    }
+                    break;
+                /* Runs at the start of each round of a mission
+                * Not sure if this has any perf impact during gameplay
+                * Will leave this setting up to the player */
+                case "BeginNewRound":
+                    if (Main.Settings.RunOnNewRound)
+                    {
+                        s_log.Log("<TurnDirector.BeginNewRound> Running on new round");
+                        Gc.RunGc();
+                    }
+                    break;
+                /* Runs post-mission after clicking Continue on the salvage screen
+                * Likely not required anymore, but will leave it up to the player */
+                case "ResolveCompleteContract":
+                    if (Main.Settings.ResolveCompleteContract)
+                    {
+                        s_log.Log("<SimGateState.ResolveCompleteContract> Running post contract");
+                        Gc.RunGc();
+                    }
+                    break;
+                default:
+                    break;
+            }
         }
     }
 

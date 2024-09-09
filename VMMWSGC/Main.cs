@@ -30,7 +30,7 @@ namespace VMMWSGC
         public static ModSettings Settings = new ModSettings();
         public static void Init(string directory, string settingsJSON)
         {
-            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly(), "github.com.0x1d7.vmmwsgc");
+            Harmony.CreateAndPatchAll(typeof(GcPostSaveSerialization), "github.com.0x1d7.vmmwsgc");
             s_log.Log($"VMMWSGC assembly version {Assembly.GetExecutingAssembly().GetName().Version} loaded");
 
             try
