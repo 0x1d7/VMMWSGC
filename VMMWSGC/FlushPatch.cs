@@ -27,7 +27,6 @@ using System.Runtime.InteropServices;
 
 namespace VMMWSGC
 {
-    /* Runs after saving a game in certain scenarios */
     static public class GcPostSaveSerialization
     {
         private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
@@ -40,9 +39,8 @@ namespace VMMWSGC
         [HarmonyPatch(typeof(TurnDirector), "StartFirstRound")]
         [HarmonyPatch(typeof(TurnDirector), "BeginNewRound")]
         [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
-        private static void PostLoad(MethodBase __originalMethod)
+        public static void PostLoad(MethodBase __originalMethod)
         {
-
             switch(__originalMethod.Name)
             {
                 /* Runs after saving a game in certain scenarios */
@@ -107,6 +105,20 @@ namespace VMMWSGC
                 default:
                     break;
             }
+        }
+    }
+
+    static public class SaveSystem
+    {
+        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
+
+        /* Skip all autosaves -- welcome to the 1990s, kids! */
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(GameInstance), "Save", new Type[] {typeof(SaveReason)})]
+        public static bool NoAutoSave(ref SaveReason reason)
+        {
+            s_log.Log($"<SaveReason:{reason}>... No save for you!");
+            return false;
         }
     }
 

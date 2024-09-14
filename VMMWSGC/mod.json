@@ -1,7 +1,7 @@
 {
   "Name": "VMMWSGC",
   "Enabled": true,
-  "Version": "1.1.2",
+  "Version": "1.2.0",
   "Description": "Empties the Battletech Private Working Set",
   "Author": "0x1d7",
   "Website": "https://github.com/0x1d7/VMMWSGC",
@@ -13,6 +13,7 @@
     "RunPostHeadAttachedState": true,
     "RunFirstRound": true,
     "RunOnNewRound": false,
-    "ResolveCompleteContract": false
+    "ResolveCompleteContract": false,
+    "NoAutosaves": false
   }
 }

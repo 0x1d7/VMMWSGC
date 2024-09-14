@@ -31,6 +31,7 @@ namespace VMMWSGC
         public static void Init(string directory, string settingsJSON)
         {
             Harmony.CreateAndPatchAll(typeof(GcPostSaveSerialization), "github.com.0x1d7.vmmwsgc");
+            Harmony.CreateAndPatchAll(typeof(SaveSystem), "github.com.0x1d7.vmmwsgc");
             s_log.Log($"VMMWSGC assembly version {Assembly.GetExecutingAssembly().GetName().Version} loaded");
 
             try
@@ -43,7 +44,8 @@ namespace VMMWSGC
                     $"RunPostHeadlessAttachedState: {Settings.RunPostHeadAttachedState}\n" +
                     $"RunFirstRound: {Settings.RunFirstRound}\n" +
                     $"RunOnNewRound: {Settings.RunOnNewRound}\n" +
-                    $"ResolveCompleteContract: {Settings.ResolveCompleteContract}");
+                    $"ResolveCompleteContract: {Settings.ResolveCompleteContract}\n" +
+                    $"NoAutosaves: {Settings.NoAutosaves}");
             }
             catch (Exception)
             {
@@ -61,6 +63,7 @@ namespace VMMWSGC
             public bool RunFirstRound { get; set; } = true;
             public bool RunOnNewRound { get; set; } = false;
             public bool ResolveCompleteContract { get; set; } = false;
+            public bool NoAutosaves { get; set; } = false;
         }
     }
 }
