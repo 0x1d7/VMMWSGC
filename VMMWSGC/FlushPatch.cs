@@ -24,6 +24,14 @@ using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
+using Ionic.Zlib;
+using HBS.Pooling;
+using BattleTech.Save.Core;
+using System.IO;
+using UnityEngine.Scripting;
+using BattleTech.Serialization;
+using Localize;
+using BattleTech.Save;
 
 namespace VMMWSGC
 {
@@ -108,7 +116,7 @@ namespace VMMWSGC
         }
     }
 
-    static public class SaveSystem
+    public class SaveSystem
     {
         private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
 
@@ -117,10 +125,63 @@ namespace VMMWSGC
         [HarmonyPatch(typeof(GameInstance), "Save", new Type[] {typeof(SaveReason)})]
         public static bool NoAutoSave(ref SaveReason reason)
         {
-            s_log.Log($"<SaveReason:{reason}>... No save for you!");
-            return false;
+            if (Main.Settings.NoAutosaves)
+            {
+                s_log.Log($"<SaveReason:{reason}>... No save for you!");
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveBlock<GameInstanceSave>), "CompressBytes", new Type[] { typeof(byte[]) })]
+        public static bool CompressBytesNew(out byte[] __result, byte[] bytes)
+        {
+            if (Main.Settings.OverrideSaveSystem)
+            {
+                s_log.Log($"VMMWSGC Saving {bytes.Length} bytes with no compression");
+                using (var ms = new MemoryStream(bytes.Length))
+                using (var gzipStream = new System.IO.Compression.GZipStream(ms, System.IO.Compression.CompressionLevel.NoCompression, false))
+                {
+                    gzipStream.Write(bytes, 0, bytes.Length);
+                    gzipStream.Close();
+                    __result = ms.ToArray();
+                }
+
+                return false;
+            }
+            __result = null;
+            return true;
         }
     }
+
+    public class LoadSystem
+    {
+        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
+
+        [HarmonyPrefix]
+        [HarmonyPatch(typeof(SaveBlock<string>), "DecompressBytes", new Type[] {typeof(byte[])})]
+        public static bool DecompressBytesNew(out byte[] __result, byte[] bytes)
+        {
+            if (Main.Settings.OverrideSaveSystem)
+            {
+                s_log.Log($"VMMWSGC Loading {bytes.Length} bytes from save");
+                using (var ms = new MemoryStream(bytes))
+                using (var ds = new MemoryStream())
+                using (var gzipStream = new GZipStream(ms, CompressionMode.Decompress, false))
+                {
+                    gzipStream.CopyTo(ds);
+                    __result = ds.ToArray();
+                }
+                return false;
+            }
+
+            __result = null;
+            return true;
+
+        }
+    }
+
 
     internal static class Gc
     {

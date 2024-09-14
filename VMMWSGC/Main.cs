@@ -32,6 +32,7 @@ namespace VMMWSGC
         {
             Harmony.CreateAndPatchAll(typeof(GcPostSaveSerialization), "github.com.0x1d7.vmmwsgc");
             Harmony.CreateAndPatchAll(typeof(SaveSystem), "github.com.0x1d7.vmmwsgc");
+            Harmony.CreateAndPatchAll(typeof(LoadSystem), "github.com.0x1d7.vmmwsgc");
             s_log.Log($"VMMWSGC assembly version {Assembly.GetExecutingAssembly().GetName().Version} loaded");
 
             try
@@ -45,7 +46,8 @@ namespace VMMWSGC
                     $"RunFirstRound: {Settings.RunFirstRound}\n" +
                     $"RunOnNewRound: {Settings.RunOnNewRound}\n" +
                     $"ResolveCompleteContract: {Settings.ResolveCompleteContract}\n" +
-                    $"NoAutosaves: {Settings.NoAutosaves}");
+                    $"NoAutosaves: {Settings.NoAutosaves}\n" +
+                    $"OverrideSaveSystem: {Settings.OverrideSaveSystem}");
             }
             catch (Exception)
             {
@@ -64,6 +66,7 @@ namespace VMMWSGC
             public bool RunOnNewRound { get; set; } = false;
             public bool ResolveCompleteContract { get; set; } = false;
             public bool NoAutosaves { get; set; } = false;
+            public bool OverrideSaveSystem { get; set; } = false;
         }
     }
 }
