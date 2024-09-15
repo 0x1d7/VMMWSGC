@@ -22,6 +22,7 @@ using BattleTech.Save.Core;
 using BattleTech.Save.SaveGameStructure;
 using HarmonyLib;
 using HBS.Logging;
+using HBS.Pooling;
 using System;
 using System.IO;
 using System.IO.Compression;
@@ -50,7 +51,6 @@ namespace VMMWSGC.Patches
 
         /* Prevents compression. Leads to very large but faster saves
          * ~5 second improvement on a 5800X3D Samsung 980 Pro 2TB
-         * Loading does not work.
          */
         [HarmonyPrefix]
         [HarmonyPatch(typeof(SaveBlock<GameInstanceSave>), "CompressBytes", new Type[] { typeof(byte[]) })]
@@ -69,24 +69,50 @@ namespace VMMWSGC.Patches
             return true;
         }
 
-        /* ToDo: Configure method to load uncompressed saves.
-         * Implement fallback for compressed saves. */
+        /* Determine if save is compressed or uncompressed, then load save.
+         * If either route fails, fallback to the normal Battletech file load process 
+         */
         [HarmonyPrefix]
         [HarmonyPatch(typeof(SaveBlock<string>), "DecompressBytes", new Type[] { typeof(byte[]) })]
         public static bool DecompressBytesNew(out byte[] __result, byte[] bytes)
         {
+
             if (Main.Settings.OverrideSaveSystem)
             {
-                s_log.Log($"VMMWSGC Loading {bytes.Length} bytes from save");
-                using (var ms = new MemoryStream(bytes))
-                using (var ds = new MemoryStream())
-                using (var gzipStream = new GZipStream(ms, CompressionMode.Decompress, false))
-                {
-                    gzipStream.CopyTo(ds);
-                    __result = ds.ToArray();
-                }
+                byte[] compressedHeader = new byte[] { 0x1f, 0x8b, 0x08, 0x00 };
+                byte[] uncompressedHeader = new byte[] { 0x08, 0x01, 0x12, 0x3a };
 
-                return false;
+                if (bytes.Take(4).SequenceEqual(compressedHeader))
+                {
+                    try
+                    {
+                        s_log.Log($"VMMWSGC Loading compressed {bytes.Length} bytes from save");
+                        using (var ms = new MemoryStream(bytes))
+                        using (var ds = new MemoryStream())
+                        using (var gzipStream = new GZipStream(ms, CompressionMode.Decompress, false))
+                        {
+                            gzipStream.CopyTo(ds);
+                            __result = ds.ToArray();
+
+                            return false;
+                        }
+                    }
+                    catch (IOException ex)
+                    {
+                        s_log.Log("Unable to read save file. Letting Battletech perform " +
+                            $"the normal load process \n {ex}");
+
+                        __result = null;
+                        return true;
+                    }
+                }
+                else if (bytes.Take(4).SequenceEqual(uncompressedHeader))
+                {
+                    s_log.Log($"VMMWSGC Loading uncompressed {bytes.Length} bytes from save");
+                    __result = bytes.ToArray();
+
+                    return false;
+                }
             }
 
             __result = null;

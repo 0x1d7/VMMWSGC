@@ -20,7 +20,7 @@ using BattleTech.UI;
 using HarmonyLib;
 using HBS.Logging;
 
-namespace VMMWSGC
+namespace VMMWSGC.Patches
 {
     public class Toast
     {
