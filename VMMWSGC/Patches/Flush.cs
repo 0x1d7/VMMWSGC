@@ -20,22 +20,11 @@ using BattleTech;
 using BattleTech.Save.SaveGameStructure;
 using HarmonyLib;
 using HBS.Logging;
-using System;
-using System.Diagnostics;
 using System.Reflection;
-using System.Runtime.InteropServices;
-using Ionic.Zlib;
-using HBS.Pooling;
-using BattleTech.Save.Core;
-using System.IO;
-using UnityEngine.Scripting;
-using BattleTech.Serialization;
-using Localize;
-using BattleTech.Save;
 
-namespace VMMWSGC
+namespace VMMWSGC.Patches
 {
-    static public class GcPostSaveSerialization
+    public class Flush
     {
         private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
 
@@ -49,7 +38,7 @@ namespace VMMWSGC
         [HarmonyPatch(typeof(SimGameState), "ResolveCompleteContract")]
         public static void PostLoad(MethodBase __originalMethod)
         {
-            switch(__originalMethod.Name)
+            switch (__originalMethod.Name)
             {
                 /* Runs after saving a game in certain scenarios */
                 case "SaveSerializationComplete":
@@ -115,98 +104,4 @@ namespace VMMWSGC
             }
         }
     }
-
-    public class SaveSystem
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        /* Skip all autosaves -- welcome to the 1990s, kids! */
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(GameInstance), "Save", new Type[] {typeof(SaveReason)})]
-        public static bool NoAutoSave(ref SaveReason reason)
-        {
-            if (Main.Settings.NoAutosaves)
-            {
-                s_log.Log($"<SaveReason:{reason}>... No save for you!");
-                return false;
-            }
-            return true;
-        }
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(SaveBlock<GameInstanceSave>), "CompressBytes", new Type[] { typeof(byte[]) })]
-        public static bool CompressBytesNew(out byte[] __result, byte[] bytes)
-        {
-            if (Main.Settings.OverrideSaveSystem)
-            {
-                s_log.Log($"VMMWSGC Saving {bytes.Length} bytes with no compression");
-                using (var ms = new MemoryStream(bytes.Length))
-                using (var gzipStream = new System.IO.Compression.GZipStream(ms, System.IO.Compression.CompressionLevel.NoCompression, false))
-                {
-                    gzipStream.Write(bytes, 0, bytes.Length);
-                    gzipStream.Close();
-                    __result = ms.ToArray();
-                }
-
-                return false;
-            }
-            __result = null;
-            return true;
-        }
-    }
-
-    public class LoadSystem
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        [HarmonyPrefix]
-        [HarmonyPatch(typeof(SaveBlock<string>), "DecompressBytes", new Type[] {typeof(byte[])})]
-        public static bool DecompressBytesNew(out byte[] __result, byte[] bytes)
-        {
-            if (Main.Settings.OverrideSaveSystem)
-            {
-                s_log.Log($"VMMWSGC Loading {bytes.Length} bytes from save");
-                using (var ms = new MemoryStream(bytes))
-                using (var ds = new MemoryStream())
-                using (var gzipStream = new GZipStream(ms, CompressionMode.Decompress, false))
-                {
-                    gzipStream.CopyTo(ds);
-                    __result = ds.ToArray();
-                }
-                return false;
-            }
-
-            __result = null;
-            return true;
-
-        }
-    }
-
-
-    internal static class Gc
-    {
-        private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
-
-        //Ref: https://learn.microsoft.com/windows/win32/api/psapi/nf-psapi-emptyworkingset
-        [DllImport("psapi.dll")]
-        public static extern bool EmptyWorkingSet(IntPtr hProcess);
-
-        internal static void RunGc()
-        {
-            try
-            {
-                /*Looks like there is an issue with Mono/Unity that causes Process.WorkingSet64 to return 0.
-                This prevents us from providing the end user with a nice value of 'saved' working set. :-(
-                */
-                EmptyWorkingSet(Process.GetCurrentProcess().Handle);
-
-                s_log.Log("Private WorkingSet emptied");
-            }
-            catch (Exception ex)
-            {
-                s_log.Log("Error emptying Private WorkingSet " + ex.ToString());
-                s_log.Log("Please open an issue with the stack trace at https://github.com/0x1d7/VMMWSGC/issues");
-            }
-        }
-    }   
 }

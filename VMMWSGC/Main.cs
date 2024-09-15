@@ -21,6 +21,7 @@ using HBS.Logging;
 using Newtonsoft.Json;
 using System;
 using System.Reflection;
+using VMMWSGC.Patches;
 
 namespace VMMWSGC
 {
@@ -30,9 +31,9 @@ namespace VMMWSGC
         public static ModSettings Settings = new ModSettings();
         public static void Init(string directory, string settingsJSON)
         {
-            Harmony.CreateAndPatchAll(typeof(GcPostSaveSerialization), "github.com.0x1d7.vmmwsgc");
+            Harmony.CreateAndPatchAll(typeof(Flush), "github.com.0x1d7.vmmwsgc");
             Harmony.CreateAndPatchAll(typeof(SaveSystem), "github.com.0x1d7.vmmwsgc");
-            Harmony.CreateAndPatchAll(typeof(LoadSystem), "github.com.0x1d7.vmmwsgc");
+            Harmony.CreateAndPatchAll(typeof(Toast), "github.com.0x1d7.vmmwsgc");
             s_log.Log($"VMMWSGC assembly version {Assembly.GetExecutingAssembly().GetName().Version} loaded");
 
             try
@@ -47,6 +48,7 @@ namespace VMMWSGC
                     $"RunOnNewRound: {Settings.RunOnNewRound}\n" +
                     $"ResolveCompleteContract: {Settings.ResolveCompleteContract}\n" +
                     $"NoAutosaves: {Settings.NoAutosaves}\n" +
+                    $"RunOnInvisibleToast: {Settings.RunOnInvisibleToast}\n" +
                     $"OverrideSaveSystem: {Settings.OverrideSaveSystem}");
             }
             catch (Exception)
@@ -66,6 +68,7 @@ namespace VMMWSGC
             public bool RunOnNewRound { get; set; } = false;
             public bool ResolveCompleteContract { get; set; } = false;
             public bool NoAutosaves { get; set; } = false;
+            public bool RunOnInvisibleToast { get; set; } = false;
             public bool OverrideSaveSystem { get; set; } = false;
         }
     }

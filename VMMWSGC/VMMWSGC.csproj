@@ -98,9 +98,12 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FlushPatch.cs" />
+    <Compile Include="Gc.cs" />
     <Compile Include="Main.cs" />
+    <Compile Include="Patches\Flush.cs" />
+    <Compile Include="Patches\SaveSystem.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Patches\Toast.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="mod.json">
