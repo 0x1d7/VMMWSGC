@@ -14,7 +14,15 @@
     "RunFirstRound": true,
     "RunOnNewRound": false,
     "ResolveCompleteContract": false,
-    "NoAutosaves": false,
+    "Autosaves": {
+      "EnableAll":  true,
+      "DisableAll": false,
+      "ArrivedAtPlanet": false,
+      "ContractAccepted": false,
+      "ContractCompleted": false,
+      "EventResolved": false,
+      "FinancialReport": false
+    },
     "RunOnInvisibleToast": false,
     "OverrideSaveSystem": false
   }

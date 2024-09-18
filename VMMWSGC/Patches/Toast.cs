@@ -30,8 +30,11 @@ namespace VMMWSGC.Patches
         [HarmonyPatch(typeof(SGSaveToast), "Invisible")]
         public static void PostInvisibleToast()
         {
-            s_log.Log("Cleaning up on invisible toast");
-            Gc.RunGc();
+            if (Main.Settings.RunOnInvisibleToast) 
+            { 
+                s_log.Log("Cleaning up on invisible toast");
+                Gc.RunGc();
+            }
         }
     }
 }

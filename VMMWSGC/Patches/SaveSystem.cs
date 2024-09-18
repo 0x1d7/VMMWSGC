@@ -34,19 +34,75 @@ namespace VMMWSGC.Patches
     {
         private static readonly ILog s_log = Logger.GetLogger(nameof(VMMWSGC));
 
-        /* Skip all autosaves -- welcome to the 1990s, kids! */
+        /* Autosave control */
         [HarmonyPrefix]
         [HarmonyPatch(typeof(GameInstance), "Save", new Type[] { typeof(SaveReason) })]
         public static bool NoAutoSave(ref SaveReason reason)
         {
-            if (Main.Settings.NoAutosaves)
+            //Default game autosave settings
+            if (Main.Settings.Autosaves.EnableAll)
             {
-                s_log.Log($"<SaveReason:{reason}>... No save for you!");
+                s_log.Log($"<SaveReason: {reason}> all autosaves enabled");
+
+                return true;
+            }
+
+            if (Main.Settings.Autosaves.DisableAll)
+            {
+                s_log.Log($"<SaveReason:{reason}> all autosaves disabled");
 
                 return false;
             }
 
-            return true;
+            //Selected useful autosave events
+            switch (reason)
+            {
+                case SaveReason.SIM_GAME_ARRIVED_AT_PLANET:
+                    if (Main.Settings.Autosaves.ArrivedAtPlanet)
+                    {
+                        s_log.Log($"<SaveReason: {reason}> taking autosave");
+
+                        return true;
+                    }
+                    break;
+                case SaveReason.SIM_GAME_EVENT_RESOLVED:
+                    if (Main.Settings.Autosaves.EventResolved)
+                    {
+                        s_log.Log($"<SaveReason: {reason}> taking autosave");
+
+                        return true;
+                    }
+                    break;
+                case SaveReason.SIM_GAME_CONTRACT_ACCEPTED:
+                    if (Main.Settings.Autosaves.ContractAccepted)
+                    {
+                        s_log.Log($"<SaveReason: {reason}> taking autosave");
+
+                        return true;
+                    }
+                    break;
+                case SaveReason.SIM_GAME_COMPLETED_CONTRACT:
+                    if (Main.Settings.Autosaves.ContractCompleted)
+                    {
+                        s_log.Log($"<SaveReason: {reason}> taking autosave");
+
+                        return true;
+                    }
+                    break;
+                case SaveReason.SIM_GAME_QUARTERLY_REPORT:
+                    if (Main.Settings.Autosaves.FinancialReport)
+                    {
+                        s_log.Log($"<SaveReason: {reason}> taking autosave");
+
+                        return true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            //Some other event occurred that isn't as useful to autosave on
+            return false;
         }
 
         /* Prevents compression. Leads to very large but faster saves
@@ -58,7 +114,7 @@ namespace VMMWSGC.Patches
         {
             if (Main.Settings.OverrideSaveSystem)
             {
-                s_log.Log($"VMMWSGC Saving {bytes.Length} bytes with no compression");
+                s_log.Log($"Saving {bytes.Length} bytes with no compression");
                 __result = bytes.ToArray();
 
                 return false;
@@ -86,7 +142,7 @@ namespace VMMWSGC.Patches
                 {
                     try
                     {
-                        s_log.Log($"VMMWSGC Loading compressed {bytes.Length} bytes from save");
+                        s_log.Log($"Loading compressed {bytes.Length} bytes from save");
                         using (var ms = new MemoryStream(bytes))
                         using (var ds = new MemoryStream())
                         using (var gzipStream = new GZipStream(ms, CompressionMode.Decompress, false))
@@ -108,7 +164,7 @@ namespace VMMWSGC.Patches
                 }
                 else if (bytes.Take(4).SequenceEqual(uncompressedHeader))
                 {
-                    s_log.Log($"VMMWSGC Loading uncompressed {bytes.Length} bytes from save");
+                    s_log.Log($"Loading uncompressed {bytes.Length} bytes from save");
                     __result = bytes.ToArray();
 
                     return false;

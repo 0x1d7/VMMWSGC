@@ -47,9 +47,16 @@ namespace VMMWSGC
                     $"RunFirstRound: {Settings.RunFirstRound}\n" +
                     $"RunOnNewRound: {Settings.RunOnNewRound}\n" +
                     $"ResolveCompleteContract: {Settings.ResolveCompleteContract}\n" +
-                    $"NoAutosaves: {Settings.NoAutosaves}\n" +
                     $"RunOnInvisibleToast: {Settings.RunOnInvisibleToast}\n" +
-                    $"OverrideSaveSystem: {Settings.OverrideSaveSystem}");
+                    $"OverrideSaveSystem: {Settings.OverrideSaveSystem}\n" +
+                    $"Autosaves Settings:\n" +
+                    $"\tEnableAll: {Settings.Autosaves.EnableAll}\n" +
+                    $"\tDisableAll: {Settings.Autosaves.DisableAll}\n" +
+                    $"\tArrivedAtPlanet: {Settings.Autosaves.ArrivedAtPlanet}\n" +
+                    $"\tEventResolved: {Settings.Autosaves.EventResolved}\n" +
+                    $"\tContractAccepted: {Settings.Autosaves.ContractAccepted}\n" +
+                    $"\tContractCompleted: {Settings.Autosaves.ContractCompleted}\n" +
+                    $"\tFinancialReport: {Settings.Autosaves.FinancialReport}");
             }
             catch (Exception)
             {
@@ -67,9 +74,20 @@ namespace VMMWSGC
             public bool RunFirstRound { get; set; } = true;
             public bool RunOnNewRound { get; set; } = false;
             public bool ResolveCompleteContract { get; set; } = false;
-            public bool NoAutosaves { get; set; } = false;
             public bool RunOnInvisibleToast { get; set; } = false;
             public bool OverrideSaveSystem { get; set; } = false;
+            public Autosaves Autosaves { get; set; }
+        }
+
+        public class Autosaves
+        {
+            public bool EnableAll { get; set; } = true;
+            public bool DisableAll { get; set; } = false;
+            public bool ArrivedAtPlanet { get; set; } = false;
+            public bool EventResolved { get; set; } = false;
+            public bool ContractAccepted { get; set; } = false;
+            public bool ContractCompleted { get; set; } = false;
+            public bool FinancialReport { get; set; } = false;
         }
     }
 }

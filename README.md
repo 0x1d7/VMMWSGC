@@ -28,9 +28,13 @@ This mod runs in approximately 0.1 milliseconds on an AMD 5800X3D with DDR4-3200
 
 The mod includes a `mod.json` file with a `Settings` entry allowing the player to change when this mod runs. The original point of execution of this mod post-contract completion has been disabled by default as it is no longer necessary, but can be re-enabled by the player. The setting `RunOnNewRound` is disabled by default. Enable this setting to empty the working set on every new round in-mission.
 
-### **__Disabling Autosaves__**
+### Managing Autosaves
 
-The setting `NoAutosaves` is disabled by default. Saving the game is a large source of the core memory leak. Enabling this setting is recommended but it is up to _you_ the player to save your game! This means if you've played a six hour session and don't save on quit, you will lose six hours of progress.
+Saving the game is a significant source of memory leaks and causes a brief freeze in the UI. This mod allows you to control when autosaves occur, if at all.
+
+Autosaves can be enabled, selectively enabled, or disabled. By default, all autosave types are enabled with the setting `EnableAll` in `mod.json`. If `DisableAll` is set to true, no autosaves of any type will be taken. Selected autosave types may be set to true or false. Note the game has other autosave types that are not represented here (such as the end of a campaign). If you want other autosave types to be enabled, set `EnableAll` to true.
+
+If you choose to disable autosaves, it is on you to save your game!
 
 ### Building
 
