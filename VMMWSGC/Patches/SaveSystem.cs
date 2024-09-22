@@ -42,6 +42,15 @@ namespace VMMWSGC.Patches
             //Default game autosave settings
             if (Main.Settings.Autosaves.EnableAll)
             {
+                if(reason == SaveReason.SIM_GAME_FIRST_SAVE)
+                {
+                    s_log.Log($"<SaveReason: {reason}> while all save reasons " +
+                        $"are enabled, we should not create the first save, " +
+                        $"at least for BTAU");
+
+                    return false;
+                }
+
                 s_log.Log($"<SaveReason: {reason}> all autosaves enabled");
 
                 return true;
